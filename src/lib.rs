@@ -134,7 +134,7 @@ where
     let l = filename.len() + ((line!() as f32).log10() as usize) + msg.len() + 4;
     buf[l] = 0;
     let sl = &buf[..l + 1];
-    let cstring = CStr::from_bytes_with_nul(&sl).unwrap();
+    let cstring = unsafe { CStr::from_bytes_with_nul_unchecked(&sl) } ;
     f(&cstring);
 }
 
