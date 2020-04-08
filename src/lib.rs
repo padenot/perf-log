@@ -1,6 +1,6 @@
-use std::io::{self, Write};
+use criterion::black_box;
 use std::ffi::CStr;
-use criterion::{black_box};
+use std::io::{self, Write};
 
 // code proposed in https://github.com/rust-lang/rust/issues/70887
 #[inline]
@@ -23,9 +23,10 @@ fn log(i: u32, base: u32) -> u32 {
     }
 
     let mut n = 1;
-    ilog(&mut n, 1, base, i/ base)
+    ilog(&mut n, 1, base, i / base)
 }
 
+// Thanks to https://github.com/nox for the Writer that can count bytes it writes
 pub struct CountingWriter<'w, W>
 where
     W: ?Sized,
@@ -81,56 +82,78 @@ where
     }
 }
 
-pub fn log_3<F>(msg: &str, f: F) where F: Fn(&CStr) {
+pub fn log_3<F>(msg: &str, f: F)
+where
+    F: Fn(&CStr),
+{
     let written;
     let buf = &mut [0u8; 256];
     {
         let mut counting_writer = CountingWriter::new(&mut buf[..]);
-        let filename = std::path::Path::new(file!()).file_name().unwrap().to_str().unwrap();
-        writeln!(
-            counting_writer,
-            "{}:{}: {}",
-            filename, line!(), msg).unwrap();
+        let filename = std::path::Path::new(file!())
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap();
+        writeln!(counting_writer, "{}:{}: {}", filename, line!(), msg).unwrap();
         written = counting_writer.written();
     }
     buf[written] = 0;
-    let sl = &buf[..written+1];
+    let sl = &buf[..written + 1];
     let cstring = CStr::from_bytes_with_nul(&sl).unwrap();
-    // println!("{:?}", cstring);
     f(&cstring);
 }
 
-
-pub fn log_1<F>(msg: &str, f: F) where F: Fn(&CStr) {
-  let filename = std::path::Path::new(file!()).file_name().unwrap().to_str().unwrap();
-  let cstr = ::std::ffi::CString::new(format!("{}:{}: {}\n", filename, line!(), msg)).unwrap(); 
-  f(&cstr);
+pub fn log_1<F>(msg: &str, f: F)
+where
+    F: Fn(&CStr),
+{
+    let filename = std::path::Path::new(file!())
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap();
+    let cstr = ::std::ffi::CString::new(format!("{}:{}: {}\n", filename, line!(), msg)).unwrap();
+    f(&cstr);
 }
 
-pub fn log_2<F>(msg: &str, f: F) where F: Fn(&CStr) {
-        let mut buf = [0 as u8; 256];
+pub fn log_2<F>(msg: &str, f: F)
+where
+    F: Fn(&CStr),
+{
+    let mut buf = [0 as u8; 256];
 
-    let filename = std::path::Path::new(file!()).file_name().unwrap().to_str().unwrap();
+    let filename = std::path::Path::new(file!())
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap();
 
-    write!(&mut buf[..], "{}:{}: {}", filename, line!(), msg).unwrap(); 
+    write!(&mut buf[..], "{}:{}: {}", filename, line!(), msg).unwrap();
     // Annoying to have to convert to f32: https://github.com/rust-lang/rust/issues/70887
-    let l = filename.len() + ((line!() as f32).log10()  as usize) + msg.len() + 4;
+    let l = filename.len() + ((line!() as f32).log10() as usize) + msg.len() + 4;
     buf[l] = 0;
-    let sl = &buf[..l+1];
+    let sl = &buf[..l + 1];
     let cstring = CStr::from_bytes_with_nul(&sl).unwrap();
     f(&cstring);
 }
 
-pub fn log_4<F>(msg: &str, f: F) where F: Fn(&CStr) {
-        let mut buf = [0 as u8; 256];
+pub fn log_4<F>(msg: &str, f: F)
+where
+    F: Fn(&CStr),
+{
+    let mut buf = [0 as u8; 256];
 
-    let filename = std::path::Path::new(file!()).file_name().unwrap().to_str().unwrap();
+    let filename = std::path::Path::new(file!())
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap();
 
-    write!(&mut buf[..], "{}:{}: {}", filename, line!(), msg).unwrap(); 
+    write!(&mut buf[..], "{}:{}: {}", filename, line!(), msg).unwrap();
     let l = filename.len() + (log(black_box(line!()), 10) as usize) + msg.len() + 4;
     buf[l] = 0;
-    let sl = &buf[..l+1];
+    let sl = &buf[..l + 1];
     let cstring = CStr::from_bytes_with_nul(&sl).unwrap();
     f(&cstring)
 }
-
