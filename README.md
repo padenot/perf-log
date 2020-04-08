@@ -37,4 +37,33 @@ Found 13 outliers among 100 measurements (13.00%)
   7 (7.00%) high severe
 ```
 
-tl;dr, [log_2](https://github.com/padenot/perf-log/blob/master/src/lib.rs#L110-L122) is faster. This could potentially be made even faster by using `itoa`, that is already in use in Gecko.
+Sample result on a MacBook Pro 2018 (2,9 GHz 6-Core Intel Core i9)
+
+```
+log1                    time:   [360.36 ns 366.44 ns 373.28 ns]                 
+Found 5 outliers among 100 measurements (5.00%)
+  2 (2.00%) high mild
+  3 (3.00%) high severe
+
+log2                    time:   [97.128 ns 97.773 ns 98.500 ns]                 
+Found 3 outliers among 100 measurements (3.00%)
+  3 (3.00%) high mild
+
+log3                    time:   [103.57 ns 104.08 ns 104.63 ns]                 
+Found 4 outliers among 100 measurements (4.00%)
+  1 (1.00%) low mild
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+
+log4                    time:   [102.42 ns 103.25 ns 104.44 ns]                 
+Found 9 outliers among 100 measurements (9.00%)
+  3 (3.00%) high mild
+  6 (6.00%) high severe
+```
+
+
+tl;dr, [log_2](https://github.com/padenot/perf-log/blob/master/src/lib.rs#L110-L122) is
+faster. This could potentially be made even faster by using `itoa`, that is
+already in use in Gecko.
+
+On macOS the impact of the allocator is very very high.
