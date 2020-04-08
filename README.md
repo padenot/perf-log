@@ -62,7 +62,7 @@ Found 9 outliers among 100 measurements (9.00%)
 ```
 
 
-tl;dr, [log_2](https://github.com/padenot/perf-log/blob/master/src/lib.rs#L110-L122) is
+tl;dr, [log_2](https://github.com/padenot/perf-log/blob/master/src/lib.rs#L120-L139) is
 faster. This could potentially be made even faster by using `itoa`, that is
 already in use in Gecko.
 
